@@ -1,0 +1,283 @@
+<!DOCTYPE html>  
+  
+<html lang="en">  
+<head>
+  <!-- Split for GitHub Pages deployment: HTML / CSS / JS -->  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Texas House · '26 Post-Primary Situation Room</title>  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">  
+  
+</head>  
+<body>  
+<div class="header">  
+  <div>  
+    <div class="header-title" style="color:var(--rep-red)">⬡ Texas House · '26 Post-Primary Situation Room</div>  
+    <div class="header-sub">89th Roster · 2024 & 2026 Elections · Speaker Vote Factions · 90th Legislature Projections · Committee Impact</div>  
+  </div>  
+  <div class="header-badges">  
+    <div class="badge-speaker">SPEAKER: DUSTIN BURROWS</div>  
+    <div class="badge-session">90TH SESSION</div>  
+  </div>  
+</div>  
+<div class="tab-bar" style="position:relative;">  
+  <button type="button" class="tab-btn" onclick="toggleSubNav('nav89',this)" id="nav89Btn">89TH LEG.</button>  
+  <button type="button" class="tab-btn" onclick="toggleSubNav('nav26',this)" id="nav26Btn"><span style='color:#1565c0'>●</span> 2026 PRIMARY</button>  
+  <button type="button" class="tab-btn" onclick="toggleSubNav('nav90',this)" id="nav90Btn"><span style='color:#c2185b'>●</span> 90TH LEG.</button>  
+</div>  
+<div id="nav89" class="sub-nav" style="display:none;">  
+  <button type="button" data-tab="elections" class="sub-nav-btn" onclick="switchTabSub('elections','nav89')">2024 ELECTION RESULTS</button>  
+  <button type="button" data-tab="members" class="sub-nav-btn" onclick="switchTabSub('members','nav89')">89TH LEG. ROSTER</button>  
+  <button type="button" data-tab="speaker" class="sub-nav-btn" onclick="switchTabSub('speaker','nav89')">SPEAKER VOTE '25</button>  
+</div>  
+<div id="nav26" class="sub-nav" style="display:none;">  
+  <button type="button" data-tab="primary26" class="sub-nav-btn" onclick="switchTabSub('primary26','nav26')">PRIMARY RESULTS</button>  
+  <button type="button" data-tab="runoffs" class="sub-nav-btn" onclick="switchTabSub('runoffs','nav26')">RUNOFFS</button>  
+  <button type="button" data-tab="hotseat" class="sub-nav-btn" onclick="switchTabSub('hotseat','nav26')">NOVEMBER ALERT</button>  
+</div>  
+<div id="nav90" class="sub-nav" style="display:none;">  
+  <button type="button" data-tab="newfaces" class="sub-nav-btn" onclick="switchTabSub('newfaces','nav90')">NEW FACES</button>  
+  <button type="button" data-tab="committees27" class="sub-nav-btn" onclick="switchTabSub('committees27','nav90')">COMMITTEES '27</button>  
+  <button type="button" data-tab="seniority27" class="sub-nav-btn" onclick="switchTabSub('seniority27','nav90')">'27 SENIORITY</button>  
+  <button type="button" data-tab="sop" class="sub-nav-btn" onclick="switchTabSub('sop','nav90')">STATE OF PLAY, 2027</button>  
+</div>  
+  
+<!-- ═══ TAB 1: MEMBERS ═══ -->  
+  
+<div class="tab-panel active" id="panel-members">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box neutral"><div class="kpi-label">TOTAL MEMBERS</div><div class="kpi-value neutral" id="kpiTotal">150</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">REPUBLICAN</div><div class="kpi-value red" id="kpiR">88</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">DEMOCRAT</div><div class="kpi-value blue" id="kpiD">62</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R MAJORITY</div><div class="kpi-value red">58.7%</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D MINORITY</div><div class="kpi-value blue">41.3%</div></div>  
+  </div>  
+  <div class="toolbar">  
+    <div class="filter-group"><label>SEARCH</label><input type="text" id="searchInput" placeholder="Name, district, committee..." oninput="filterTable()"></div>  
+    <div class="filter-group"><label>PARTY</label><select id="partyFilter" onchange="filterTable()"><option value="">All</option><option value="R">R</option><option value="D">D</option></select></div>  
+    <div class="filter-group"><label>COMMITTEE</label><select id="committeeFilter" onchange="filterTable()"><option value="">All Committees</option></select></div>  
+    <div class="result-count" id="resultCount">SHOWING 150 OF 150</div>  
+  </div>  
+  <div class="table-wrap"><table><thead><tr>  
+    <th onclick="sortTable(0,'num')" style="width:60px">'25 SENIORITY <span class="sort-arrow" id="sort0">▲</span></th>  
+    <th onclick="sortTable(1,'str')">MEMBER <span class="sort-arrow" id="sort1"></span></th>  
+    <th onclick="sortTable(2,'str')" style="width:50px">PARTY <span class="sort-arrow" id="sort2"></span></th>  
+    <th onclick="sortTable(3,'num')" style="width:55px">DIST <span class="sort-arrow" id="sort3"></span></th>  
+    <th onclick="sortTable(4,'str')">COMMITTEES <span class="sort-arrow" id="sort4"></span></th>  
+  </tr></thead><tbody id="memberBody"></tbody></table>  
+  <div class="empty-state" id="emptyState" style="display:none">NO MEMBERS MATCH CURRENT FILTERS</div></div>  
+</div></div>  
+  
+<!-- ═══ TAB 2: 2024 ELECTIONS ═══ -->  
+  
+<div class="tab-panel" id="panel-elections">  
+<div class="content">  
+  <div class="kpi-row k6">  
+    <div class="kpi-box neutral"><div class="kpi-label">DISTRICTS</div><div class="kpi-value neutral">150</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">CONTESTED R</div><div class="kpi-value red" id="kpi24RC">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">CONTESTED D</div><div class="kpi-value blue" id="kpi24DC">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R RUNOFFS</div><div class="kpi-value red" id="kpi24RR">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D RUNOFFS</div><div class="kpi-value blue" id="kpi24DR">—</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">INC. DEFEATED</div><div class="kpi-value warn" id="kpi24Lost">16</div></div>  
+  </div>  
+  <div style="display:flex;gap:8px;margin-bottom:12px;">  
+    <div style="flex:1;background:var(--surface);border:1px solid var(--border-color);font-family:var(--font-mono);">  
+      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').classList.toggle('open')" style="padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--rep-red);">  
+        <span style="font-size:9px;letter-spacing:2px;color:var(--rep-red);font-weight:700;">INCUMBENTS DEFEATED (16)</span><span class="chevron" aria-hidden="true">▼</span>  
+      </div>  
+      <div style="display:none;padding:8px 14px;border-top:1px solid var(--muted-rule);font-size:10px;color:var(--text-secondary);line-height:2;" id="callout24Defeated"></div>  
+    </div>  
+    <div style="flex:1;background:var(--surface);border:1px solid var(--border-color);font-family:var(--font-mono);">  
+      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').classList.toggle('open')" style="padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--primary);">  
+        <span style="font-size:9px;letter-spacing:2px;color:var(--primary);font-weight:700;">NEW MEMBERS (89TH LEGISLATURE)</span><span class="chevron" aria-hidden="true">▼</span>  
+      </div>  
+      <div style="display:none;padding:8px 14px;border-top:1px solid var(--muted-rule);font-size:10px;color:var(--text-secondary);line-height:2;" id="callout24New"></div>  
+    </div>  
+  </div>  
+  <div class="toolbar">  
+    <div class="filter-group"><label>SEARCH</label><input type="text" id="elecSearch" placeholder="District or candidate..." oninput="filterElections()"></div>  
+    <div class="filter-group"><label>PHASE</label><select id="elecPhase" onchange="filterElections()"><option value="">All</option><option value="general">General</option><option value="march_r">R Primary</option><option value="march_d">D Primary</option><option value="may_r">R Runoff</option><option value="may_d">D Runoff</option></select></div>  
+    <div class="filter-group"><label>TYPE</label><select id="elecContested" onchange="filterElections()"><option value="">All</option><option value="contested">Contested</option><option value="unopposed">Unopposed</option></select></div>  
+    <div class="result-count" id="elecCount"></div>  
+  </div>  
+  <div id="elecBody"></div>  
+</div></div>  
+  
+<!-- ═══ TAB 3: SPEAKER VOTE ═══ -->  
+  
+<div class="tab-panel" id="panel-speaker">  
+<div class="content">  
+  <div class="kpi-row k6">  
+    <div class="kpi-box green"><div class="kpi-label">RD 1 · BURROWS (YEA)</div><div class="kpi-value green">71</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">RD 1 · RAMOS (NAY)</div><div class="kpi-value red">23</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">RD 1 · COOK (PNV)</div><div class="kpi-value neutral">56</div></div>  
+    <div class="kpi-box green"><div class="kpi-label">RD 2 · BURROWS (YEA)</div><div class="kpi-value green">85</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">RD 2 · COOK (NAY)</div><div class="kpi-value neutral">55</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">RD 2 · PNV / ABSENT</div><div class="kpi-value warn">10</div></div>  
+  </div>  
+  <div class="toolbar">  
+    <div class="filter-group"><label>SEARCH</label><input type="text" id="spkSearch" placeholder="Name or district..." oninput="renderSpeaker()"></div>  
+    <div class="filter-group"><label>PARTY</label><select id="spkParty" onchange="renderSpeaker()"><option value="">All</option><option value="R">R</option><option value="D">D</option></select></div>  
+    <div class="filter-group"><label>RD 1 VOTE</label><select id="spkR1" onchange="renderSpeaker()"><option value="">All</option><option value="BURROWS">Burrows</option><option value="RAMOS">Ramos</option><option value="COOK">Cook</option></select></div>  
+    <div class="filter-group"><label>RD 2 VOTE</label><select id="spkR2" onchange="renderSpeaker()"><option value="">All</option><option value="BURROWS">Burrows</option><option value="COOK">Cook</option><option value="PNV">PNV</option><option value="ABSENT">Absent</option></select></div>  
+    <div class="filter-group"><label>FACTION</label><select id="spkFaction" onchange="renderSpeaker()"><option value="">All</option><option value="B">Burrows Core (R)</option><option value="C">Burrows Democrats</option><option value="F">Switch Republicans</option><option value="R">Reform Caucus (R)</option><option value="S">Symbolic Democrats</option><option value="P">Purity Democrats</option><option value="?">Contrarian Democrats</option></select></div>  
+    <div class="result-count" id="spkCount"></div>  
+  </div>  
+  <div class="faction-legend">  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#fde8e8;border-color:#DE0100;color:#DE0100">B</span>Burrows Core Republicans (34)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#e8e7fd;border-color:#1405BD;color:#1405BD">C</span>Burrows Democrats (37)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#fff0e6;border-color:#CC5500;color:#CC5500">F</span>Switch Republicans (2)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#eceff1;border-color:#546e7a;color:#546e7a">R</span>Reform Caucus (52)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#e3f1ff;border-color:#73BCFF;color:#3a8fd4">S</span>Symbolic Democrats (12)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#e0f6ff;border-color:#00aef3;color:#0089c2">P</span>Purity Democrats (11)</div>  
+    <div class="faction-legend-item"><span class="faction-circle" style="background:#eef4ff;border-color:#C7DCFE;color:#6b8ec2">?</span>Contrarian Democrats (2)</div>  
+  </div>  
+  <div class="table-wrap"><table><thead><tr>  
+    <th style="width:55px">DIST</th><th>MEMBER</th><th style="width:50px;text-align:right">PARTY</th>  
+    <th style="width:110px;text-align:right">RD 1 (RV#2)</th><th style="width:110px;text-align:right">RD 2 (RV#3)</th>  
+  </tr></thead><tbody id="spkBody"></tbody></table></div>  
+</div></div>  
+  
+<!-- ═══ TAB 4: 2026 PRIMARY ═══ -->  
+  
+<div class="tab-panel" id="panel-primary26">  
+<div class="content">  
+  <div class="kpi-row k6">  
+    <div class="kpi-box neutral"><div class="kpi-label">DISTRICTS</div><div class="kpi-value neutral">150</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">CONTESTED R</div><div class="kpi-value red" id="kpi26RC">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">CONTESTED D</div><div class="kpi-value blue" id="kpi26DC">—</div></div>  
+    <div class="kpi-box green"><div class="kpi-label">PROJ. RUNOFFS</div><div class="kpi-value green" id="kpi26Runoffs">—</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">OPEN SEATS</div><div class="kpi-value neutral" id="kpi26Open">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">POSS. FLIPS</div><div class="kpi-value blue" id="kpi26Flips">—</div></div>  
+  </div>  
+  <div class="toolbar">  
+    <div class="filter-group"><label>SEARCH</label><input type="text" id="p26Search" placeholder="District or candidate..." oninput="filter26()"></div>  
+    <div class="filter-group"><label>PARTY</label><select id="p26Party" onchange="filter26()"><option value="">All</option><option value="R">R</option><option value="D">D</option></select></div>  
+    <div class="filter-group"><label>STATUS</label><select id="p26Status" onchange="filter26()"><option value="">All</option><option value="runoff">Runoff Projected</option><option value="open">Former Member (Retired)</option><option value="inc_lost">Incumbent Lost</option><option value="contested">Contested</option><option value="unopposed">Unopposed</option><option value="flip">Possible Flip</option></select></div>  
+    <div class="result-count" id="p26Count"></div>  
+  </div>  
+  <div id="p26Body"></div>  
+</div></div>  
+  
+<!-- ═══ TAB 5: HOT SEAT ═══ -->  
+  
+<div class="tab-panel" id="panel-hotseat">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box warn"><div class="kpi-label">NOVEMBER ALERTS</div><div class="kpi-value warn" id="kpiHotTotal">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R HELD → D LEAD</div><div class="kpi-value red" id="kpiHotRtoD">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D HELD → R LEAD</div><div class="kpi-value blue" id="kpiHotDtoR">—</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">SMALLEST MARGIN</div><div class="kpi-value neutral" id="kpiHotSmall">—</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">LARGEST MARGIN</div><div class="kpi-value neutral" id="kpiHotLarge">—</div></div>  
+  </div>  
+  <div class="toolbar">  
+    <div class="filter-group"><label>SEARCH</label><input type="text" id="hotSearch" placeholder="District or name..." oninput="renderHot()"></div>  
+    <div class="result-count" id="hotCount"></div>  
+  </div>  
+  <div id="hotBody"></div>  
+</div></div>  
+  
+<div class="tab-panel" id="panel-runoffs">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box warn"><div class="kpi-label">TOTAL RUNOFFS</div><div class="kpi-value warn" id="kpiRunTotal">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R RUNOFFS</div><div class="kpi-value red" id="kpiRunR">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D RUNOFFS</div><div class="kpi-value blue" id="kpiRunD">—</div></div>  
+    <div class="kpi-box neutral"><div class="kpi-label">OPEN SEAT RUNOFFS</div><div class="kpi-value neutral" id="kpiRunOpen">—</div></div>  
+    <div class="kpi-box green"><div class="kpi-label">INC. IN RUNOFF</div><div class="kpi-value green" id="kpiRunInc">—</div></div>  
+  </div>  
+  <div id="runBody"></div>  
+</div></div>  
+<div class="tab-panel" id="panel-newfaces">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box neutral"><div class="kpi-label">OPEN SEATS</div><div class="kpi-value neutral" id="kpiNfOpen">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R OPEN</div><div class="kpi-value red" id="kpiNfR">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D OPEN</div><div class="kpi-value blue" id="kpiNfD">—</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">INC. DEFEATED</div><div class="kpi-value warn" id="kpiNfLost">—</div></div>  
+    <div class="kpi-box green"><div class="kpi-label">TOTAL NEW FACES</div><div class="kpi-value green" id="kpiNfTotal">—</div></div>  
+  </div>  
+  <div id="nfGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px;"></div>  
+  <div style="margin-top:16px;padding:10px 0;border-top:2px solid var(--muted-light);">  
+    <div style="font-size:9px;letter-spacing:3px;color:var(--warning);font-weight:700;margin-bottom:12px;">● NOVEMBER ALERT — INCUMBENT SEATS AT RISK</div>  
+    <div id="nfAlertGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>  
+  </div>  
+</div></div>  
+  
+<div class="tab-panel" id="panel-committees27">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box neutral"><div class="kpi-label">COMMITTEES</div><div class="kpi-value neutral" id="cmte27Total">30</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">MEMBERS NOT RETURNING</div><div class="kpi-value red" id="cmte27NotReturn">—</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">MEMBERS IN DANGER</div><div class="kpi-value warn" id="cmte27Danger">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">CHAIRS AT RISK</div><div class="kpi-value red" id="cmte27ChairRisk">—</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">VICE CHAIRS AT RISK</div><div class="kpi-value warn" id="cmte27VchRisk">—</div></div>  
+  </div>  
+  <div id="cmte27Body"></div>  
+</div></div>  
+  
+<div class="tab-panel" id="panel-seniority27">  
+<div class="content">  
+  <div class="kpi-row k5">  
+    <div class="kpi-box neutral"><div class="kpi-label">RETURNING MEMBERS</div><div class="kpi-value neutral" id="senReturning">—</div></div>  
+    <div class="kpi-box red"><div class="kpi-label">R RETURNING</div><div class="kpi-value red" id="senR">—</div></div>  
+    <div class="kpi-box blue"><div class="kpi-label">D RETURNING</div><div class="kpi-value blue" id="senD">—</div></div>  
+    <div class="kpi-box warn"><div class="kpi-label">VACANT SEATS</div><div class="kpi-value warn" id="senVacant">—</div></div>  
+    <div class="kpi-box green"><div class="kpi-label">TOTAL SEATS</div><div class="kpi-value green">150</div></div>  
+  </div>  
+  <div class="table-wrap"><table><thead><tr>  
+    <th style="width:50px">'27 RANK</th><th style="width:70px">'25 SENIORITY</th><th style="width:55px">DIST</th><th>MEMBER</th><th style="width:50px">PARTY</th>  
+    <th>STATUS</th>  
+  </tr></thead><tbody id="senBody"></tbody></table></div>  
+</div></div>  
+<div class="tab-panel" id="panel-sop">  
+<div class="content">  
+  <!-- HEMICYCLE + COUNTER ROW -->  
+  <div style="display:flex;gap:16px;margin-bottom:16px;align-items:flex-start;">  
+    <div style="flex:3;background:var(--surface);border:1px solid var(--border-color);padding:10px 12px;">  
+      <div style="font-size:8px;letter-spacing:3px;color:var(--muted);font-weight:700;margin-bottom:8px;text-align:center;">90TH TEXAS HOUSE — PROJECTED SEAT BOARD</div>  
+      <div id="voteBoard" style="display:grid;grid-template-rows:repeat(17,1fr);grid-auto-flow:column;grid-template-columns:repeat(9,1fr);gap:2px 6px;font-family:var(--font-mono);"></div>  
+    </div>  
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;" id="sopCounter">  
+      <!-- Loyalty breakdown boxes -->  
+      <div style="font-size:7px;letter-spacing:2px;color:var(--muted);font-weight:700;">LOYALTY BREAKDOWN</div>  
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">  
+        <div style="background:#fde8e8;border:1px solid #c62828;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#c62828;letter-spacing:1px;font-weight:700;">STRONG BURROWS</div><div style="font-size:18px;font-weight:900;color:#c62828;" id="loyStrongB">0</div></div>  
+        <div style="background:#fff0e6;border:1px solid #e65100;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#e65100;letter-spacing:1px;font-weight:700;">LEAN BURROWS</div><div style="font-size:18px;font-weight:900;color:#e65100;" id="loyLeanB">0</div></div>  
+        <div style="background:#fffde7;border:1px solid #f9a825;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#f57f17;letter-spacing:1px;font-weight:700;">BACKING WINNER</div><div style="font-size:18px;font-weight:900;color:#f57f17;" id="loyBacking">0</div></div>  
+        <div style="background:var(--muted-bg);border:1px solid var(--muted-light);padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:var(--muted);letter-spacing:1px;font-weight:700;">NEUTRAL</div><div style="font-size:18px;font-weight:900;color:var(--text-secondary);" id="loyNeutral">0</div></div>  
+        <div style="background:#eceff1;border:1px solid #546e7a;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#546e7a;letter-spacing:1px;font-weight:700;">LEAN REFORM</div><div style="font-size:18px;font-weight:900;color:#546e7a;" id="loyLeanR">0</div></div>  
+        <div style="background:#e8eaef;border:1px solid #37474f;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#37474f;letter-spacing:1px;font-weight:700;">STRONG REFORM</div><div style="font-size:18px;font-weight:900;color:#37474f;" id="loyStrongR">0</div></div>  
+        <div style="background:#e3f2fd;border:1px solid #1565c0;padding:6px;text-align:center;font-family:var(--font-mono);"><div style="font-size:7px;color:#1565c0;letter-spacing:1px;font-weight:700;">LEAN/STRONG DEM</div><div style="font-size:18px;font-weight:900;color:#1565c0;" id="loyDem">0</div></div>  
+      </div>  
+      <!-- Floor vote totals -->  
+      <div style="font-size:7px;letter-spacing:2px;color:var(--muted);font-weight:700;margin-top:4px;">FLOOR VOTES — SPEAKER ELECTION</div>  
+      <div style="display:flex;flex-direction:column;gap:4px;">  
+        <div style="background:#fde8e8;border:1px solid #9B1C31;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);"><span style="font-size:9px;color:#9B1C31;font-weight:700;">BURROWS (R)</span><span style="font-size:22px;font-weight:900;color:#9B1C31;" id="floorBurrows">0</span></div>  
+        <div style="background:#fff0e6;border:1px solid #CC5500;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);"><span style="font-size:9px;color:#CC5500;font-weight:700;">OTHER (R)</span><span style="font-size:22px;font-weight:900;color:#CC5500;" id="floorOther">0</span></div>  
+        <div style="background:#e3f2fd;border:1px solid #1565c0;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);"><span style="font-size:9px;color:#1565c0;font-weight:700;">DEMOCRAT (D)</span><span style="font-size:22px;font-weight:900;color:#1565c0;" id="floorDem">0</span></div>  
+        <div style="background:var(--muted-bg);border:1px solid var(--muted-light);padding:6px 10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);"><span style="font-size:8px;color:var(--muted);font-weight:700;">UNASSIGNED</span><span style="font-size:16px;font-weight:900;color:var(--muted);" id="floorNone">150</span></div>  
+        <div style="background:var(--surface);border:1px solid var(--border-color);padding:6px 10px;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);"><span style="font-size:8px;color:var(--text-primary);font-weight:700;">MAJORITY NEEDED</span><span style="font-size:14px;font-weight:900;color:var(--text-primary);">76</span></div>  
+      </div>  
+    </div>  
+  </div>  
+  <!-- SECTIONS -->  
+  <div style="font-size:9px;letter-spacing:3px;color:var(--text-primary);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--muted-light);padding-bottom:4px;">RETURNING INCUMBENTS — WON PRIMARY <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(Expected to win general)</span></div>  
+  <div id="sopReturning" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;"></div>  
+  <div style="font-size:9px;letter-spacing:3px;color:var(--warning);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--warning);padding-bottom:4px;">NEW FACES — PRIMARY WINNERS <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(No general contest or expected to win general)</span></div>  
+  <div id="sopNewFaces" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;"></div>  
+  <div onclick="document.getElementById('sopRunoffsWrap').style.display=document.getElementById('sopRunoffsWrap').style.display==='none'?'flex':'none';this.querySelector('.chevron').classList.toggle('open')" style="font-size:9px;letter-spacing:3px;color:var(--success);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--success);padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">PRIMARY RUNOFFS — PENDING MAY RESULTS<span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopRunoffsWrap" style="margin-bottom:20px;"><div id="sopRunoffs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+  <div onclick="document.getElementById('sopContestsWrap').style.display=document.getElementById('sopContestsWrap').style.display==='none'?'flex':'none';this.querySelector('.chevron').classList.toggle('open')" style="font-size:9px;letter-spacing:3px;color:#e65100;font-weight:700;margin-bottom:8px;border-bottom:2px solid #e65100;padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">NOVEMBER ALERT — CONTESTED GENERAL ELECTION RACES<span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopContestsWrap" style="margin-bottom:16px;"><div id="sopContests" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+</div></div>  
+<div class="footer">SITUATION ROOM · TEXAS HOUSE · Developed by Santino Camacho, Office of Rep. Drew Darby · Beta v1 · Election Data current with the Secretary of State, Mar. 04, 2026 · SOURCE: SOS CANVASS REPORTS · HOUSE JOURNAL RV#2 & RV#3</div>  
+  
+  <script src="./js/app.js" defer></script>  
+  
+</body>  
+</html>  
