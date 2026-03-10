@@ -473,6 +473,11 @@ function getSopData(){
       if(!window._sopToggles[d+'_main'])window._sopToggles[d+'_main']='d';// Vo expected to lose  
       continue;  
     }  
+    // HD-40 Canales is expected to win primary despite GOP runoff; keep in expected-to-win bucket  
+    if(d===40&&!openSeat&&!incLost){  
+      returning.push({d,name:inc.n,party:inc.p,faction:f});  
+      continue;  
+    }  
     // Runoff (non-flip) goes to runoffs section  
     if(hasRunoff){  
       runoffRaces.push({d,inc,faction:f,rCands,dCands,rRunoff,dRunoff,openSeat,incLost});  
@@ -689,47 +694,44 @@ const consultantAssignments={
   'Jorge Borrego':['Berry'],
   'Armin Mizani':['Griffin'],
   'Candy Noble':['Brannon & Co.'],
+  'Angela Orr':['Knorfleet','Parr'],
   'Angelia Orr':['Knorfleet','Parr'],
   'Jared Patterson':['GDC3'],
   'Cheryl Bean':['Axiom'],
   'Ken King':['Knorfleet'],
   'Jay Dean':['GDC3'],
   'Tom Butler':['Griffin'],
-  'Brad Buckley':['Parr'],
+  'Brad Bailey':['Parr'],
   'Janie Lopez':['Leon Strat.'],
-  'Raymond "Ray" Lopez':['Knorfleet'],
+  'Ray Callas':['Knorfleet'],
+  'Terri Leo-Wilson':['Berry'],
   'Terri Leo Wilson':['Berry'],
-  'Holly Jones':['Blakemore'],
+  'Holly Jeffreys':['Blakemore'],
   'Jay Hardaway':['Knorfleet'],
   'Stan Gerdes':['Parr'],
   'Pat Curry':['Knorfleet'],
   'Rocky Thigpen':['Parr'],
   'Andy Hopper':['Griffin'],
   'Will Metcalf':['Berry'],
-  'Ellen Troxclair':['Berry'],
+  'Ellen Fleischmann':['Parr'],
   'Mark Dorazio':['Griffin'],
   'Marc LaHood':['Griffin'],
   'Cody Harris':['Knorfleet','Parr'],
   'Alan Schoolcraft':['Axiom'],
+  'Alan B. Schoolcraft':['Axiom'],
+  'Caroline Harris-Davila':['Berry'],
   'Caroline Harris Davila':['Berry'],
   'Cole Hefner':['Berry'],
   'Lacey Hull':['Berry'],
   'Scott Bowen':['Griffin'],
   'Mike Olcott':['Griffin'],
   'Jeff Leach':['GDC3'],
+  'Ellen Troxclair':['Berry'],
+  'Angie Chen-Button':['Parr'],
   'Angie Chen Button':['Parr'],
   'Morgan Meyer':['Allyn Media'],
-  'Alan B. Schoolcraft':['Axiom'],
   'Alan Blaylock':['Parr'],
-  'Drew Darby':['KC Strat.'],
-  'Angela Orr':['Knorfleet','Parr'],
-  'Brad Bailey':['Parr'],
-  'Ray Callas':['Knorfleet'],
-  'Terri Leo-Wilson':['Berry'],
-  'Holly Jeffreys':['Blakemore'],
-  'Caroline Harris-Davila':['Berry'],
-  'Angie Chen-Button':['Parr'],
-  'Ellen Fleischmann':['Parr']
+  'Drew Darby':['KC Strat.']
 };
 const consultantAssignmentsDefault=JSON.parse(JSON.stringify(consultantAssignments));
 consultantByNorm={};
