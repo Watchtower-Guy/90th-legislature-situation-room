@@ -225,12 +225,12 @@ img,svg,canvas{max-width:100%;height:auto;}
 .consultant-card{background:var(--surface);border:1px solid var(--border-color);border-top:3px solid var(--consultant-color,#4169E1);padding:6px;min-height:120px;transition:box-shadow .12s,border-color .12s;}
 .consultant-card.drag-over{border-color:var(--consultant-color,#4169E1);box-shadow:0 0 0 2px color-mix(in srgb,var(--consultant-color,#4169E1) 25%, transparent);}
 .consultant-card-head{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:1px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;border-bottom:1px solid var(--muted-rule);padding-bottom:4px;}
-.consultant-dropzone{display:flex;flex-direction:column;gap:5px;min-height:160px;}
-.consultant-member{display:flex;flex-direction:column;align-items:stretch;gap:4px;background:var(--muted-surface);border:1px solid var(--muted-rule);padding:6px;cursor:grab;aspect-ratio:1/1;justify-content:space-between;}
+.consultant-dropzone{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:4px;min-height:80px;}
+.consultant-member{display:flex;flex-direction:column;align-items:stretch;gap:3px;background:var(--muted-surface);border:1px solid var(--muted-rule);padding:4px;cursor:grab;min-height:62px;justify-content:space-between;}
 .consultant-member.dragging{opacity:.45;}
 .consultant-member-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
-.consultant-member-name{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.consultant-member-dist{font-size:9px;color:var(--muted);font-weight:700;}
+.consultant-member-name{font-size:8px;font-weight:700;line-height:1.2;max-height:2.4em;overflow:hidden;}
+.consultant-member-dist{font-size:8px;color:var(--muted);font-weight:700;}
 .consultant-context-menu{position:absolute;z-index:2000;background:var(--surface);border:1px solid var(--border-color);box-shadow:0 8px 20px rgba(0,0,0,.12);min-width:220px;padding:4px;display:flex;flex-direction:column;gap:2px;}
 .consultant-context-menu button{border:none;background:transparent;text-align:left;padding:6px 8px;font-family:var(--font-mono);font-size:10px;cursor:pointer;color:var(--text-primary);}
 .consultant-context-menu button:hover{background:var(--muted-surface);}
