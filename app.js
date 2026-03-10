@@ -92,8 +92,6 @@ function renderTable(d){const tb=document.getElementById('memberBody'),em=docume
 function filterTable(){const s=document.getElementById('searchInput').value.toLowerCase(),p=document.getElementById('partyFilter').value,c=document.getElementById('committeeFilter').value;filteredMembers=members.filter(m=>{if(p&&m.party!==p)return false;if(c&&!m.committees.some(x=>baseCmte(x)===c))return false;if(s){const h=(m.name+' '+m.district+' '+m.committees.join(' ')).toLowerCase();if(!h.includes(s))return false;}return true;});applySortAndRender();}  
 function sortTable(col,type){for(let i=0;i<6;i++)document.getElementById('sort'+i).textContent='';if(currentSort.col===col)currentSort.dir=currentSort.dir==='asc'?'desc':'asc';else currentSort={col,dir:'asc',type};document.getElementById('sort'+col).textContent=currentSort.dir==='asc'?'▲':'▼';applySortAndRender();}  
 function applySortAndRender(){const keys=['seniority','name','consultants','party','district','committees'],key=keys[currentSort.col];filteredMembers.sort((a,b)=>{let va=a[key],vb=b[key];if(key==='committees'){va=va[0]||'';vb=vb[0]||'';}if(key==='consultants'){va=getMemberConsultants(a.name).join(' | ');vb=getMemberConsultants(b.name).join(' | ');}if(currentSort.type==='num')return currentSort.dir==='asc'?va-vb:vb-va;va=String(va).toLowerCase();vb=String(vb).toLowerCase();return currentSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);});renderTable(filteredMembers);}  
-renderTable(members);  
-  
 /* ═══ SHARED ═══ */  
 function fmt(n){return n.toLocaleString();}  
 function pct(v,t){return t>0?((v/t)*100).toFixed(1)+'%':'0%';}  
