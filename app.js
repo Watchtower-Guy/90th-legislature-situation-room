@@ -85,10 +85,10 @@ function incumbentRan(d){const inc=incumbents[d];if(!inc)return true;const ds=St
 let currentSort={col:0,dir:'asc',type:'num'},filteredMembers=[...members];  
 function baseCmte(c){return c.replace(/, CH$/,'').replace(/, VCH$/,'');}  
 function renderCmteTags(cs){return cs.map(c=>{const iC=c.endsWith(', CH'),iV=c.endsWith(', VCH'),iS=c==='Speaker of the House';if(iS)return`<span class="cmte-tag is-speaker">${c}</span>`;const b=baseCmte(c),ci=cmteColorMap[b];let cls='cmte-tag cc'+(ci??0),l=c,r='';if(iC){l=b;r='<span class="cmte-role">CH</span>';}else if(iV){l=b;r='<span class="cmte-role">VCH</span>';}return`<span class="${cls}">${l}${r}</span>`;}).join(' ');}  
-function renderTable(d){const tb=document.getElementById('memberBody'),em=document.getElementById('emptyState');if(!d.length){tb.innerHTML='';em.style.display='block';}else{em.style.display='none';tb.innerHTML=d.map(m=>`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${m.seniority}</span></td><td class="name-cell">${m.name}</td><td><span class="party-tag ${m.party}">${m.party}</span></td><td class="district-cell">${m.district}</td><td class="committee-cell">${renderCmteTags(m.committees)}</td></tr>`).join('');}document.getElementById('resultCount').textContent=`SHOWING ${d.length} OF 150`;document.getElementById('kpiTotal').textContent=d.length;document.getElementById('kpiR').textContent=d.filter(m=>m.party==='R').length;document.getElementById('kpiD').textContent=d.filter(m=>m.party==='D').length;}  
+function renderTable(d){const tb=document.getElementById('memberBody'),em=document.getElementById('emptyState');if(!d.length){tb.innerHTML='';em.style.display='block';}else{em.style.display='none';tb.innerHTML=d.map(m=>`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${m.seniority}</span></td><td class="name-cell">${m.name}</td><td class="consultant-cell"><div class="consultant-tag-row consultant-tag-row-inline">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}">${m.party}</span></td><td class="district-cell">${m.district}</td><td class="committee-cell">${renderCmteTags(m.committees)}</td></tr>`).join('');}document.getElementById('resultCount').textContent=`SHOWING ${d.length} OF 150`;document.getElementById('kpiTotal').textContent=d.length;document.getElementById('kpiR').textContent=d.filter(m=>m.party==='R').length;document.getElementById('kpiD').textContent=d.filter(m=>m.party==='D').length;}  
 function filterTable(){const s=document.getElementById('searchInput').value.toLowerCase(),p=document.getElementById('partyFilter').value,c=document.getElementById('committeeFilter').value;filteredMembers=members.filter(m=>{if(p&&m.party!==p)return false;if(c&&!m.committees.some(x=>baseCmte(x)===c))return false;if(s){const h=(m.name+' '+m.district+' '+m.committees.join(' ')).toLowerCase();if(!h.includes(s))return false;}return true;});applySortAndRender();}  
-function sortTable(col,type){for(let i=0;i<5;i++)document.getElementById('sort'+i).textContent='';if(currentSort.col===col)currentSort.dir=currentSort.dir==='asc'?'desc':'asc';else currentSort={col,dir:'asc',type};document.getElementById('sort'+col).textContent=currentSort.dir==='asc'?'▲':'▼';applySortAndRender();}  
-function applySortAndRender(){const keys=['seniority','name','party','district','committees'],key=keys[currentSort.col];filteredMembers.sort((a,b)=>{let va=a[key],vb=b[key];if(key==='committees'){va=va[0]||'';vb=vb[0]||'';}if(currentSort.type==='num')return currentSort.dir==='asc'?va-vb:vb-va;va=String(va).toLowerCase();vb=String(vb).toLowerCase();return currentSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);});renderTable(filteredMembers);}  
+function sortTable(col,type){for(let i=0;i<6;i++)document.getElementById('sort'+i).textContent='';if(currentSort.col===col)currentSort.dir=currentSort.dir==='asc'?'desc':'asc';else currentSort={col,dir:'asc',type};document.getElementById('sort'+col).textContent=currentSort.dir==='asc'?'▲':'▼';applySortAndRender();}  
+function applySortAndRender(){const keys=['seniority','name','consultants','party','district','committees'],key=keys[currentSort.col];filteredMembers.sort((a,b)=>{let va=a[key],vb=b[key];if(key==='committees'){va=va[0]||'';vb=vb[0]||'';}if(key==='consultants'){va=getMemberConsultants(a.name).join(' | ');vb=getMemberConsultants(b.name).join(' | ');}if(currentSort.type==='num')return currentSort.dir==='asc'?va-vb:vb-va;va=String(va).toLowerCase();vb=String(vb).toLowerCase();return currentSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);});renderTable(filteredMembers);}  
 renderTable(members);  
   
 /* ═══ SHARED ═══ */  
@@ -96,6 +96,7 @@ function fmt(n){return n.toLocaleString();}
 function pct(v,t){return t>0?((v/t)*100).toFixed(1)+'%':'0%';}  
 function pctN(v,t){return t>0?(v/t)*100:0;}  
 function togBody(el){el.nextElementSibling.classList.toggle('open');el.querySelector('.chevron').classList.toggle('open');}  
+function toggleSopSection(id,trigger){const wrap=document.getElementById(id);if(!wrap)return;const isClosed=wrap.style.display==='none'||!wrap.style.display;wrap.style.display=isClosed?'block':'none';if(trigger){const chev=trigger.querySelector('.chevron');if(chev)chev.classList.toggle('open',isClosed);}}
   
 /* ═══ TAB 2: 2024 ELECTIONS ═══ */  
 function rPhase(label,cands){if(!cands||!cands.length)return '';const t=cands.reduce((s,c)=>s+c[1],0);let h=`<div class="phase-section"><div class="phase-label">${label}</div>`;cands.forEach((c,i)=>{const[n,v,p]=c;const w=pctN(v,t);const isW=i===0&&cands.length>1;h+=`<div class="cand-row"><span class="party-tag ${p||'I'}" style="font-size:8px;padding:1px 5px">${p||'—'}</span><span class="cand-name">${n}${isW?' <span class="winner-icon">✓</span>':''}</span><span class="cand-votes">${fmt(v)}</span><span class="cand-pct">${pct(v,t)}</span><span class="cand-bar-wrap"><span class="cand-bar ${p||'I'}" style="width:${w}%"></span></span></div>`;});return h+'</div>';}  
@@ -681,6 +682,7 @@ buildCommittees27();
   
 
 const consultantPalette=['#4c6ef5','#2f9e44','#f08c00','#7b2cbf','#0b7285','#c92a2a','#5f3dc4','#099268','#d9480f','#1c7ed6','#a61e4d','#e67700'];
+const consultantDefineColors=['#4169E1','#2e7d32','#b45309','#7b1fa2','#00838f','#c62828','#4e342e','#1565c0','#558b2f','#6a1b9a'];
 const consultantAssignments={
   'Chris Spencer':['Axiom'],
   'Jorge Borrego':['Berry'],
@@ -728,10 +730,12 @@ const consultantAssignments={
   'Angie Chen-Button':['Parr'],
   'Ellen Fleischmann':['Parr']
 };
+const consultantAssignmentsDefault=JSON.parse(JSON.stringify(consultantAssignments));
 const consultantByNorm={};
 Object.entries(consultantAssignments).forEach(([name,cons])=>{consultantByNorm[normName(name)]=[...cons];});
 const consultantNACache=new Set();
 const consultantColorMap={};
+const consultantDefineState={open:false,memberName:'',selectedColor:consultantDefineColors[0],pendingConsultant:null};
 
 function ensureConsultantColor(name){
   if(!consultantColorMap[name]){
@@ -760,8 +764,9 @@ function collectConsultantGroups(){
 function renderConsultantsBoard(){
   const wrap=document.getElementById('consultantsBoard');if(!wrap)return;
   const groups=collectConsultantGroups();
-  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span><span class="consultant-member-name">${escHtml(m.name)}</span><span class="consultant-member-dist">HD-${m.district}</span></div>`).join('')}</div></div>`;}).join('');
+  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district}</div></div>`).join('')}</div></div>`;}).join('');
   bindConsultantDnD();
+  bindConsultantContextMenus();
 }
 function bindConsultantDnD(){
   document.querySelectorAll('.consultant-member').forEach(el=>{
@@ -772,9 +777,91 @@ function bindConsultantDnD(){
     const zone=card.querySelector('.consultant-dropzone');
     zone.addEventListener('dragover',ev=>{ev.preventDefault();card.classList.add('drag-over');});
     zone.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
-    zone.addEventListener('drop',ev=>{ev.preventDefault();card.classList.remove('drag-over');const memberName=ev.dataTransfer.getData('text/plain');if(!memberName)return;setMemberConsultants(memberName,[card.dataset.consultant]);renderConsultantsBoard();buildSeniority();});
+    zone.addEventListener('drop',ev=>{
+      ev.preventDefault();card.classList.remove('drag-over');
+      const memberName=ev.dataTransfer.getData('text/plain');if(!memberName)return;
+      const consultantName=card.dataset.consultant;
+      const defineNew=window.confirm('Assign to this consultant? Click OK to assign, or Cancel to Define New.');
+      if(defineNew){setMemberConsultants(memberName,[consultantName]);renderConsultantsBoard();buildSeniority();return;}
+      openConsultantDefineModal(memberName,consultantName);
+    });
   });
 }
+function bindConsultantContextMenus(){
+  document.querySelectorAll('.consultant-member').forEach(el=>{
+    el.addEventListener('contextmenu',ev=>{
+      ev.preventDefault();
+      openConsultantContextMenu(ev.pageX,ev.pageY,el.dataset.member||'');
+    });
+  });
+}
+function openConsultantContextMenu(x,y,memberName){
+  const menu=document.getElementById('consultantContextMenu');if(!menu)return;
+  const groups=collectConsultantGroups().map(([name])=>name).filter(name=>name!=='N/A');
+  menu.innerHTML=[...groups.map(name=>`<button type="button" data-member="${escAttr(memberName)}" data-consultant="${escAttr(name)}">SET CONSULTANT: ${escHtml(name)}</button>`),`<button type="button" class="define-new" data-member="${escAttr(memberName)}" data-consultant="">DEFINE NEW</button>`].join('');
+  menu.style.left=`${x}px`;menu.style.top=`${y}px`;menu.style.display='block';
+  menu.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      closeConsultantContextMenu();
+      const targetMember=btn.dataset.member||'';
+      if(!targetMember)return;
+      if(btn.classList.contains('define-new')){openConsultantDefineModal(targetMember,'');return;}
+      setMemberConsultants(targetMember,[btn.dataset.consultant||'N/A']);renderConsultantsBoard();buildSeniority();
+    });
+  });
+}
+function closeConsultantContextMenu(){
+  const menu=document.getElementById('consultantContextMenu');if(menu)menu.style.display='none';
+}
+function openConsultantDefineModal(memberName,pendingConsultant){
+  const modal=document.getElementById('consultantDefineModal');if(!modal)return;
+  consultantDefineState.open=true;
+  consultantDefineState.memberName=memberName;
+  consultantDefineState.pendingConsultant=pendingConsultant||null;
+  consultantDefineState.selectedColor=consultantDefineColors[0];
+  const nameInput=document.getElementById('consultantDefineName');
+  const grid=document.getElementById('consultantColorGrid');
+  if(nameInput)nameInput.value='';
+  if(grid){
+    grid.innerHTML=consultantDefineColors.map((color,idx)=>`<button type="button" class="consultant-color-choice ${idx===0?'active':''}" data-color="${color}" style="background:${color};" aria-label="Consultant color ${idx+1}"></button>`).join('');
+    grid.querySelectorAll('.consultant-color-choice').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        consultantDefineState.selectedColor=btn.dataset.color||consultantDefineColors[0];
+        grid.querySelectorAll('.consultant-color-choice').forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+  modal.style.display='flex';
+  if(nameInput)nameInput.focus();
+}
+function closeConsultantDefineModal(){
+  const modal=document.getElementById('consultantDefineModal');if(modal)modal.style.display='none';
+  consultantDefineState.open=false;
+}
+function saveConsultantDefineModal(){
+  const nameInput=document.getElementById('consultantDefineName');if(!nameInput)return;
+  const newName=(nameInput.value||'').trim();
+  if(!newName||!consultantDefineState.memberName)return;
+  consultantColorMap[newName]=consultantDefineState.selectedColor;
+  setMemberConsultants(consultantDefineState.memberName,[newName]);
+  closeConsultantDefineModal();
+  renderConsultantsBoard();
+  buildSeniority();
+}
+function resetConsultants(){
+  Object.keys(consultantByNorm).forEach(k=>delete consultantByNorm[k]);
+  Object.entries(consultantAssignmentsDefault).forEach(([name,cons])=>{consultantByNorm[normName(name)]=[...cons];});
+  consultantNACache.clear();
+  closeConsultantContextMenu();
+  closeConsultantDefineModal();
+  renderConsultantsBoard();
+  buildSeniority();
+}
+document.addEventListener('click',ev=>{
+  const menu=document.getElementById('consultantContextMenu');
+  if(menu&&menu.style.display==='block'&&!menu.contains(ev.target))closeConsultantContextMenu();
+});
 
 /* ═══ '27 SENIORITY ═══ */  
 function buildSeniority(){  
