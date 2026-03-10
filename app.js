@@ -753,43 +753,62 @@ function getMemberConsultants(name){
   return ['N/A'];
 }
 function setMemberConsultants(name,consultants){consultantByNorm[normName(name)]=uniqueList(consultants).length?uniqueList(consultants):['N/A'];}
-function getStateOfPlayConsultantStatus(m){
-  const d=m.district;
-  const ds=String(d);
-  const inc=incumbents[ds];
-  if(!inc)return null;
-  const pd=primary26[ds]||{};
-  const rCands=(pd.R||{}).candidates||[];
-  const dCands=(pd.D||{}).candidates||[];
-  const iRan=incumbentRan(d);
-  let incLost=false;
-  if(iRan){const pc=inc.p==='R'?rCands:dCands;if(pc.length>=2){const t=pc.reduce((sum,c)=>sum+c[1],0);if(t>0&&!isIncumbent(d,pc[0][0],inc.p)&&pc[0][1]/t>0.5)incLost=true;}}
-  if(!iRan||incLost)return null;
-  const pc=inc.p==='R'?rCands:dCands;
-  const oppParty=inc.p==='R'?'D':'R';
-  const oppCands=oppParty==='R'?rCands:dCands;
-  const isCompetitive=Boolean(flipMap[d]);
-  if(pc.length>=2&&pc[0][2]<50)return{code:'RO',tone:'runoff'};
-  if(isCompetitive&&oppCands.length)return{code:'Ch',tone:'challenger'};
-  return{code:'I',tone:'incumbent'};
+function getStateOfPlayConsultantEntries(){
+  const entries=[];
+  const seen=new Set();
+  const addEntry=(name,party,district,statuses)=>{
+    if(!name)return;
+    const cleanStatuses=uniqueList(statuses);
+    const key=`${normName(name)}|${district}|${party}|${cleanStatuses.join('/')}`;
+    if(seen.has(key))return;
+    seen.add(key);
+    entries.push({name,party,district,sopStatuses:cleanStatuses});
+  };
+  for(let d=1;d<=150;d++){
+    const ds=String(d);const inc=incumbents[ds];if(!inc)continue;
+    const pd=primary26[ds]||{};
+    const rCands=(pd.R||{}).candidates||[];
+    const dCands=(pd.D||{}).candidates||[];
+    const iRan=incumbentRan(d);
+    let incLost=false;
+    if(iRan){const pc=inc.p==='R'?rCands:dCands;if(pc.length>=2){const t=pc.reduce((sum,c)=>sum+c[1],0);if(t>0&&!isIncumbent(d,pc[0][0],inc.p)&&pc[0][1]/t>0.5)incLost=true;}}
+    if(!iRan||incLost)continue;
+
+    const incCands=inc.p==='R'?rCands:dCands;
+    const incRunoff=incCands.length>=2&&incCands[0][2]<50&&incCands.some(c=>isIncumbent(d,c[0],inc.p));
+    addEntry(inc.n,inc.p,d,incRunoff?['I','RO']:['I']);
+
+    if(incRunoff){
+      incCands.forEach(c=>{if(!isIncumbent(d,c[0],inc.p))addEntry(c[0],inc.p,d,['RO']);});
+    }
+
+    if(flipMap[d]){
+      const oppParty=inc.p==='R'?'D':'R';
+      const oppCands=oppParty==='R'?rCands:dCands;
+      if(oppCands.length>=2&&oppCands[0][2]<50){
+        oppCands.slice(0,2).forEach(c=>addEntry(c[0],oppParty,d,['Ch','RO']));
+      }else if(oppCands.length>=1){
+        addEntry(oppCands[0][0],oppParty,d,['Ch']);
+      }
+    }
+  }
+  return entries;
 }
 function consultantTagsHtml(name){
   return getMemberConsultants(name).map(c=>{const color=ensureConsultantColor(c);return `<span class="consultant-tag" style="border-color:${color};color:${color};background:${color}1a;">CONSULTANT: ${escHtml(c)}</span>`;}).join(' ');
 }
 function collectConsultantGroups(){
   const groups={};
-  members.forEach(m=>{
-    const sopStatus=getStateOfPlayConsultantStatus(m);
-    if(!sopStatus)return;
-    getMemberConsultants(m.name).forEach(c=>{if(!groups[c])groups[c]=[];groups[c].push({...m,sopStatus});ensureConsultantColor(c);});
+  getStateOfPlayConsultantEntries().forEach(m=>{
+    getMemberConsultants(m.name).forEach(c=>{if(!groups[c])groups[c]=[];groups[c].push(m);ensureConsultantColor(c);});
   });
-  Object.values(groups).forEach(arr=>arr.sort((a,b)=>a.name.localeCompare(b.name)));
+  Object.values(groups).forEach(arr=>arr.sort((a,b)=>(a.district-b.district)||a.name.localeCompare(b.name)));
   return Object.entries(groups).sort((a,b)=>{if(a[0]==='N/A')return 1;if(b[0]==='N/A')return -1;return a[0].localeCompare(b[0]);});
 }
 function renderConsultantsBoard(){
   const wrap=document.getElementById('consultantsBoard');if(!wrap)return;
   const groups=collectConsultantGroups();
-  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district} <span class="sop-chip ${m.sopStatus.tone}">${m.sopStatus.code}</span></div></div>`).join('')}</div></div>`;}).join('');
+  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district} ${m.sopStatuses.map(code=>`<span class="sop-chip ${code==='I'?'incumbent':code==='RO'?'runoff':'challenger'}">${code}</span>`).join('')}</div></div>`).join('')}</div></div>`;}).join('');
   bindConsultantDnD();
   bindConsultantContextMenus();
 }
