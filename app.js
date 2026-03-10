@@ -679,6 +679,103 @@ function buildCommittees27(){
 buildCommittees27();  
   
   
+
+const consultantPalette=['#4c6ef5','#2f9e44','#f08c00','#7b2cbf','#0b7285','#c92a2a','#5f3dc4','#099268','#d9480f','#1c7ed6','#a61e4d','#e67700'];
+const consultantAssignments={
+  'Chris Spencer':['Axiom'],
+  'Jorge Borrego':['Berry'],
+  'Armin Mizani':['Griffin'],
+  'Candy Noble':['Brannon & Co.'],
+  'Angelia Orr':['Knorfleet','Parr'],
+  'Jared Patterson':['GDC3'],
+  'Cheryl Bean':['Axiom'],
+  'Ken King':['Knorfleet'],
+  'Jay Dean':['GDC3'],
+  'Tom Butler':['Griffin'],
+  'Brad Buckley':['Parr'],
+  'Janie Lopez':['Leon Strat.'],
+  'Raymond "Ray" Lopez':['Knorfleet'],
+  'Terri Leo Wilson':['Berry'],
+  'Holly Jones':['Blakemore'],
+  'Jay Hardaway':['Knorfleet'],
+  'Stan Gerdes':['Parr'],
+  'Pat Curry':['Knorfleet'],
+  'Rocky Thigpen':['Parr'],
+  'Andy Hopper':['Griffin'],
+  'Will Metcalf':['Berry'],
+  'Ellen Troxclair':['Berry'],
+  'Mark Dorazio':['Griffin'],
+  'Marc LaHood':['Griffin'],
+  'Cody Harris':['Knorfleet','Parr'],
+  'Alan Schoolcraft':['Axiom'],
+  'Caroline Harris Davila':['Berry'],
+  'Cole Hefner':['Berry'],
+  'Lacey Hull':['Berry'],
+  'Scott Bowen':['Griffin'],
+  'Mike Olcott':['Griffin'],
+  'Jeff Leach':['GDC3'],
+  'Angie Chen Button':['Parr'],
+  'Morgan Meyer':['Allyn Media'],
+  'Alan B. Schoolcraft':['Axiom'],
+  'Alan Blaylock':['Parr'],
+  'Drew Darby':['KC Strat.'],
+  'Angela Orr':['Knorfleet','Parr'],
+  'Brad Bailey':['Parr'],
+  'Ray Callas':['Knorfleet'],
+  'Terri Leo-Wilson':['Berry'],
+  'Holly Jeffreys':['Blakemore'],
+  'Caroline Harris-Davila':['Berry'],
+  'Angie Chen-Button':['Parr'],
+  'Ellen Fleischmann':['Parr']
+};
+const consultantByNorm={};
+Object.entries(consultantAssignments).forEach(([name,cons])=>{consultantByNorm[normName(name)]=[...cons];});
+const consultantNACache=new Set();
+const consultantColorMap={};
+
+function ensureConsultantColor(name){
+  if(!consultantColorMap[name]){
+    const idx=Object.keys(consultantColorMap).length%consultantPalette.length;
+    consultantColorMap[name]=consultantPalette[idx];
+  }
+  return consultantColorMap[name];
+}
+function getMemberConsultants(name){
+  const key=normName(name);
+  const found=consultantByNorm[key];
+  if(found&&found.length)return found;
+  consultantNACache.add(name);
+  return ['N/A'];
+}
+function setMemberConsultants(name,consultants){consultantByNorm[normName(name)]=uniqueList(consultants).length?uniqueList(consultants):['N/A'];}
+function consultantTagsHtml(name){
+  return getMemberConsultants(name).map(c=>{const color=ensureConsultantColor(c);return `<span class="consultant-tag" style="border-color:${color};color:${color};background:${color}1a;">CONSULTANT: ${escHtml(c)}</span>`;}).join(' ');
+}
+function collectConsultantGroups(){
+  const groups={};
+  members.forEach(m=>{getMemberConsultants(m.name).forEach(c=>{if(!groups[c])groups[c]=[];groups[c].push(m);ensureConsultantColor(c);});});
+  Object.values(groups).forEach(arr=>arr.sort((a,b)=>a.name.localeCompare(b.name)));
+  return Object.entries(groups).sort((a,b)=>{if(a[0]==='N/A')return 1;if(b[0]==='N/A')return -1;return a[0].localeCompare(b[0]);});
+}
+function renderConsultantsBoard(){
+  const wrap=document.getElementById('consultantsBoard');if(!wrap)return;
+  const groups=collectConsultantGroups();
+  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span><span class="consultant-member-name">${escHtml(m.name)}</span><span class="consultant-member-dist">HD-${m.district}</span></div>`).join('')}</div></div>`;}).join('');
+  bindConsultantDnD();
+}
+function bindConsultantDnD(){
+  document.querySelectorAll('.consultant-member').forEach(el=>{
+    el.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('text/plain',el.dataset.member||'');el.classList.add('dragging');});
+    el.addEventListener('dragend',()=>el.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.consultant-card').forEach(card=>{
+    const zone=card.querySelector('.consultant-dropzone');
+    zone.addEventListener('dragover',ev=>{ev.preventDefault();card.classList.add('drag-over');});
+    zone.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+    zone.addEventListener('drop',ev=>{ev.preventDefault();card.classList.remove('drag-over');const memberName=ev.dataTransfer.getData('text/plain');if(!memberName)return;setMemberConsultants(memberName,[card.dataset.consultant]);renderConsultantsBoard();buildSeniority();});
+  });
+}
+
 /* ═══ '27 SENIORITY ═══ */  
 function buildSeniority(){  
   // Determine status of each member  
@@ -729,14 +826,14 @@ function buildSeniority(){
     let tags='';  
     if(isRun)tags+=`<span style="font-size:7px;padding:1px 5px;background:var(--warning-light);border:1px solid var(--warning);color:var(--warning);font-weight:700;">INCUMBENT RUNOFF</span> `;  
     if(isDanger)tags+=`<span style="font-size:7px;padding:1px 5px;background:#fff3e0;border:1px solid #ef6c00;color:#e65100;font-weight:700;cursor:pointer;" title="November Alert district">AT RISK?</span> `;  
-    h+=`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${rank}</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fffde7;border:1px solid #f9a825;color:#f57f17;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${d}</td><td class="name-cell">${m.name}</td><td><span class="party-tag ${m.party}">${m.party}</span></td><td>${tags}</td></tr>`;  
+    h+=`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${rank}</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fffde7;border:1px solid #f9a825;color:#f57f17;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${d}</td><td class="name-cell">${m.name}<div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}">${m.party}</span></td><td>${tags}</td></tr>`;  
     rank++;  
   });  
   // Vacant rows  
   vacant.sort((a,b)=>a.district-b.district);  
   vacant.forEach(m=>{  
     const reason=incumbentRan(m.district)?'Defeated in primary':'Retired / Sought higher office';  
-    h+=`<tr style="background:#f5f5f5;opacity:0.6;"><td class="seniority-cell"><span class="seniority-badge" style="background:#e0e0e0;color:#999;">—</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fff8e1;border:1px solid #ffe082;color:#c8a415;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${m.district}</td><td class="name-cell" style="color:#999;text-decoration:line-through;">${m.name}</td><td><span class="party-tag ${m.party}" style="opacity:0.4;">${m.party}</span></td><td><span style="font-size:8px;padding:1px 6px;background:#e0e0e0;border:1px solid #bbb;color:#888;font-weight:700;">VACANT · ${reason}</span></td></tr>`;  
+    h+=`<tr style="background:#f5f5f5;opacity:0.6;"><td class="seniority-cell"><span class="seniority-badge" style="background:#e0e0e0;color:#999;">—</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fff8e1;border:1px solid #ffe082;color:#c8a415;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${m.district}</td><td class="name-cell" style="color:#999;text-decoration:line-through;">${m.name}<div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}" style="opacity:0.4;">${m.party}</span></td><td><span style="font-size:8px;padding:1px 6px;background:#e0e0e0;border:1px solid #bbb;color:#888;font-weight:700;">VACANT · ${reason}</span></td></tr>`;  
   });  
   document.getElementById('senBody').innerHTML=h;  
 }  
@@ -928,6 +1025,7 @@ function drawVoteBoard(seats){
   
 initDefaults();  
 renderSOP();  
+renderConsultantsBoard();  
   
 // Startup: open 89th leg nav, activate members  
 document.getElementById('nav89').style.display='flex';  
