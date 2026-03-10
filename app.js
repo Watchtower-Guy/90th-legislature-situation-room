@@ -779,7 +779,7 @@ function getStateOfPlayConsultantEntries(){
     addEntry(inc.n,inc.p,d,incRunoff?['I','RO']:['I']);
 
     if(incRunoff){
-      incCands.forEach(c=>{if(!isIncumbent(d,c[0],inc.p))addEntry(c[0],inc.p,d,['RO']);});
+      incCands.slice(0,2).forEach(c=>{if(!isIncumbent(d,c[0],inc.p))addEntry(c[0],inc.p,d,['RO']);});
     }
 
     if(flipMap[d]){
