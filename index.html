@@ -238,8 +238,23 @@
 
 <div class="tab-panel" id="panel-consultants">  
 <div class="content">  
+  <div class="toolbar" style="margin-bottom:10px;">
+    <button type="button" class="tab-btn" style="padding:8px 12px;border:1px solid var(--border-color);" onclick="resetConsultants()">RESET</button>
+  </div>
   <div style="font-size:9px;letter-spacing:3px;color:var(--text-primary);font-weight:700;margin-bottom:10px;border-bottom:2px solid var(--muted-light);padding-bottom:4px;">CONSULTANT GROUPS <span style="font-weight:400;color:var(--muted);letter-spacing:1px;">(Drag members between cards to update Consultant tags)</span></div>  
   <div id="consultantsBoard" class="consultants-board"></div>  
+  <div id="consultantContextMenu" class="consultant-context-menu" style="display:none;"></div>
+  <div id="consultantDefineModal" class="consultant-define-modal" style="display:none;">
+    <div class="consultant-define-panel">
+      <div class="consultant-define-title">DEFINE NEW CONSULTANT</div>
+      <input id="consultantDefineName" type="text" placeholder="Consultant name">
+      <div id="consultantColorGrid" class="consultant-color-grid"></div>
+      <div class="consultant-define-actions">
+        <button type="button" class="tab-btn" onclick="closeConsultantDefineModal()">CANCEL</button>
+        <button type="button" class="tab-btn active" onclick="saveConsultantDefineModal()">SAVE</button>
+      </div>
+    </div>
+  </div>
 </div></div>  
 
 <div class="tab-panel" id="panel-sop">  
