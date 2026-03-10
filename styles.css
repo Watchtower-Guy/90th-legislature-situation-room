@@ -231,6 +231,10 @@ img,svg,canvas{max-width:100%;height:auto;}
 .consultant-member-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
 .consultant-member-name{font-size:8px;font-weight:700;line-height:1.2;max-height:2.4em;overflow:hidden;}
 .consultant-member-dist{font-size:8px;color:var(--muted);font-weight:700;}
+.sop-chip{display:inline-block;margin-left:4px;padding:0 4px;font-size:7px;line-height:1.5;font-weight:800;border:1px solid currentColor;}
+.sop-chip.incumbent{color:#1b5e20;background:#e8f5e9;border-color:#2e7d32;}
+.sop-chip.runoff{color:#b71c1c;background:#ffebee;border-color:#b71c1c;}
+.sop-chip.challenger{color:#006064;background:#e0f7fa;border-color:#00838f;}
 .consultant-context-menu{position:absolute;z-index:2000;background:var(--surface);border:1px solid var(--border-color);box-shadow:0 8px 20px rgba(0,0,0,.12);min-width:220px;padding:4px;display:flex;flex-direction:column;gap:2px;}
 .consultant-context-menu button{border:none;background:transparent;text-align:left;padding:6px 8px;font-family:var(--font-mono);font-size:10px;cursor:pointer;color:var(--text-primary);}
 .consultant-context-menu button:hover{background:var(--muted-surface);}
