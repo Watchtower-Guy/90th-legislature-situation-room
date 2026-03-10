@@ -88,10 +88,10 @@ function incumbentRan(d){const inc=incumbents[d];if(!inc)return true;const ds=St
 let currentSort={col:0,dir:'asc',type:'num'},filteredMembers=[...members];  
 function baseCmte(c){return c.replace(/, CH$/,'').replace(/, VCH$/,'');}  
 function renderCmteTags(cs){return cs.map(c=>{const iC=c.endsWith(', CH'),iV=c.endsWith(', VCH'),iS=c==='Speaker of the House';if(iS)return`<span class="cmte-tag is-speaker">${c}</span>`;const b=baseCmte(c),ci=cmteColorMap[b];let cls='cmte-tag cc'+(ci??0),l=c,r='';if(iC){l=b;r='<span class="cmte-role">CH</span>';}else if(iV){l=b;r='<span class="cmte-role">VCH</span>';}return`<span class="${cls}">${l}${r}</span>`;}).join(' ');}  
-function renderTable(d){const tb=document.getElementById('memberBody'),em=document.getElementById('emptyState');if(!d.length){tb.innerHTML='';em.style.display='block';}else{em.style.display='none';tb.innerHTML=d.map(m=>`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${m.seniority}</span></td><td class="name-cell">${m.name}</td><td class="consultant-cell"><div class="consultant-tag-row consultant-tag-row-inline">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}">${m.party}</span></td><td class="district-cell">${m.district}</td><td class="committee-cell">${renderCmteTags(m.committees)}</td></tr>`).join('');}document.getElementById('resultCount').textContent=`SHOWING ${d.length} OF 150`;document.getElementById('kpiTotal').textContent=d.length;document.getElementById('kpiR').textContent=d.filter(m=>m.party==='R').length;document.getElementById('kpiD').textContent=d.filter(m=>m.party==='D').length;}  
+function renderTable(d){const tb=document.getElementById('memberBody'),em=document.getElementById('emptyState');if(!d.length){tb.innerHTML='';em.style.display='block';}else{em.style.display='none';tb.innerHTML=d.map(m=>`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${m.seniority}</span></td><td class="name-cell">${m.name}</td><td><span class="party-tag ${m.party}">${m.party}</span></td><td class="district-cell">${m.district}</td><td class="committee-cell">${renderCmteTags(m.committees)}</td></tr>`).join('');}document.getElementById('resultCount').textContent=`SHOWING ${d.length} OF 150`;document.getElementById('kpiTotal').textContent=d.length;document.getElementById('kpiR').textContent=d.filter(m=>m.party==='R').length;document.getElementById('kpiD').textContent=d.filter(m=>m.party==='D').length;}  
 function filterTable(){const s=document.getElementById('searchInput').value.toLowerCase(),p=document.getElementById('partyFilter').value,c=document.getElementById('committeeFilter').value;filteredMembers=members.filter(m=>{if(p&&m.party!==p)return false;if(c&&!m.committees.some(x=>baseCmte(x)===c))return false;if(s){const h=(m.name+' '+m.district+' '+m.committees.join(' ')).toLowerCase();if(!h.includes(s))return false;}return true;});applySortAndRender();}  
-function sortTable(col,type){for(let i=0;i<6;i++)document.getElementById('sort'+i).textContent='';if(currentSort.col===col)currentSort.dir=currentSort.dir==='asc'?'desc':'asc';else currentSort={col,dir:'asc',type};document.getElementById('sort'+col).textContent=currentSort.dir==='asc'?'▲':'▼';applySortAndRender();}  
-function applySortAndRender(){const keys=['seniority','name','consultants','party','district','committees'],key=keys[currentSort.col];filteredMembers.sort((a,b)=>{let va=a[key],vb=b[key];if(key==='committees'){va=va[0]||'';vb=vb[0]||'';}if(key==='consultants'){va=getMemberConsultants(a.name).join(' | ');vb=getMemberConsultants(b.name).join(' | ');}if(currentSort.type==='num')return currentSort.dir==='asc'?va-vb:vb-va;va=String(va).toLowerCase();vb=String(vb).toLowerCase();return currentSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);});renderTable(filteredMembers);}  
+function sortTable(col,type){for(let i=0;i<5;i++)document.getElementById('sort'+i).textContent='';if(currentSort.col===col)currentSort.dir=currentSort.dir==='asc'?'desc':'asc';else currentSort={col,dir:'asc',type};document.getElementById('sort'+col).textContent=currentSort.dir==='asc'?'▲':'▼';applySortAndRender();}  
+function applySortAndRender(){const keys=['seniority','name','party','district','committees'],key=keys[currentSort.col];filteredMembers.sort((a,b)=>{let va=a[key],vb=b[key];if(key==='committees'){va=va[0]||'';vb=vb[0]||'';}if(currentSort.type==='num')return currentSort.dir==='asc'?va-vb:vb-va;va=String(va).toLowerCase();vb=String(vb).toLowerCase();return currentSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);});renderTable(filteredMembers);}  
 /* ═══ SHARED ═══ */  
 function fmt(n){return n.toLocaleString();}  
 function pct(v,t){return t>0?((v/t)*100).toFixed(1)+'%':'0%';}  
@@ -753,19 +753,62 @@ function getMemberConsultants(name){
   return ['N/A'];
 }
 function setMemberConsultants(name,consultants){consultantByNorm[normName(name)]=uniqueList(consultants).length?uniqueList(consultants):['N/A'];}
+function getStateOfPlayConsultantEntries(){
+  const entries=[];
+  const seen=new Set();
+  const addEntry=(name,party,district,statuses)=>{
+    if(!name)return;
+    const cleanStatuses=uniqueList(statuses);
+    const key=`${normName(name)}|${district}|${party}|${cleanStatuses.join('/')}`;
+    if(seen.has(key))return;
+    seen.add(key);
+    entries.push({name,party,district,sopStatuses:cleanStatuses});
+  };
+  for(let d=1;d<=150;d++){
+    const ds=String(d);const inc=incumbents[ds];if(!inc)continue;
+    const pd=primary26[ds]||{};
+    const rCands=(pd.R||{}).candidates||[];
+    const dCands=(pd.D||{}).candidates||[];
+    const iRan=incumbentRan(d);
+    let incLost=false;
+    if(iRan){const pc=inc.p==='R'?rCands:dCands;if(pc.length>=2){const t=pc.reduce((sum,c)=>sum+c[1],0);if(t>0&&!isIncumbent(d,pc[0][0],inc.p)&&pc[0][1]/t>0.5)incLost=true;}}
+    if(!iRan||incLost)continue;
+
+    const incCands=inc.p==='R'?rCands:dCands;
+    const incRunoff=incCands.length>=2&&incCands[0][2]<50&&incCands.some(c=>isIncumbent(d,c[0],inc.p));
+    addEntry(inc.n,inc.p,d,incRunoff?['I','RO']:['I']);
+
+    if(incRunoff){
+      incCands.slice(0,2).forEach(c=>{if(!isIncumbent(d,c[0],inc.p))addEntry(c[0],inc.p,d,['RO']);});
+    }
+
+    if(flipMap[d]){
+      const oppParty=inc.p==='R'?'D':'R';
+      const oppCands=oppParty==='R'?rCands:dCands;
+      if(oppCands.length>=2&&oppCands[0][2]<50){
+        oppCands.slice(0,2).forEach(c=>addEntry(c[0],oppParty,d,['Ch','RO']));
+      }else if(oppCands.length>=1){
+        addEntry(oppCands[0][0],oppParty,d,['Ch']);
+      }
+    }
+  }
+  return entries;
+}
 function consultantTagsHtml(name){
   return getMemberConsultants(name).map(c=>{const color=ensureConsultantColor(c);return `<span class="consultant-tag" style="border-color:${color};color:${color};background:${color}1a;">CONSULTANT: ${escHtml(c)}</span>`;}).join(' ');
 }
 function collectConsultantGroups(){
   const groups={};
-  members.forEach(m=>{getMemberConsultants(m.name).forEach(c=>{if(!groups[c])groups[c]=[];groups[c].push(m);ensureConsultantColor(c);});});
-  Object.values(groups).forEach(arr=>arr.sort((a,b)=>a.name.localeCompare(b.name)));
+  getStateOfPlayConsultantEntries().forEach(m=>{
+    getMemberConsultants(m.name).forEach(c=>{if(!groups[c])groups[c]=[];groups[c].push(m);ensureConsultantColor(c);});
+  });
+  Object.values(groups).forEach(arr=>arr.sort((a,b)=>(a.district-b.district)||a.name.localeCompare(b.name)));
   return Object.entries(groups).sort((a,b)=>{if(a[0]==='N/A')return 1;if(b[0]==='N/A')return -1;return a[0].localeCompare(b[0]);});
 }
 function renderConsultantsBoard(){
   const wrap=document.getElementById('consultantsBoard');if(!wrap)return;
   const groups=collectConsultantGroups();
-  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district}</div></div>`).join('')}</div></div>`;}).join('');
+  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district} ${m.sopStatuses.map(code=>`<span class="sop-chip ${code==='I'?'incumbent':code==='RO'?'runoff':'challenger'}">${code}</span>`).join('')}</div></div>`).join('')}</div></div>`;}).join('');
   bindConsultantDnD();
   bindConsultantContextMenus();
 }
@@ -915,14 +958,14 @@ function buildSeniority(){
     let tags='';  
     if(isRun)tags+=`<span style="font-size:7px;padding:1px 5px;background:var(--warning-light);border:1px solid var(--warning);color:var(--warning);font-weight:700;">INCUMBENT RUNOFF</span> `;  
     if(isDanger)tags+=`<span style="font-size:7px;padding:1px 5px;background:#fff3e0;border:1px solid #ef6c00;color:#e65100;font-weight:700;cursor:pointer;" title="November Alert district">AT RISK?</span> `;  
-    h+=`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${rank}</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fffde7;border:1px solid #f9a825;color:#f57f17;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${d}</td><td class="name-cell">${m.name}<div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}">${m.party}</span></td><td>${tags}</td></tr>`;  
+    h+=`<tr class="party-${m.party}"><td class="seniority-cell"><span class="seniority-badge">${rank}</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fffde7;border:1px solid #f9a825;color:#f57f17;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${d}</td><td class="name-cell">${m.name}</td><td class="consultant-cell"><div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}">${m.party}</span></td><td>${tags}</td></tr>`;  
     rank++;  
   });  
   // Vacant rows  
   vacant.sort((a,b)=>a.district-b.district);  
   vacant.forEach(m=>{  
     const reason=incumbentRan(m.district)?'Defeated in primary':'Retired / Sought higher office';  
-    h+=`<tr style="background:#f5f5f5;opacity:0.6;"><td class="seniority-cell"><span class="seniority-badge" style="background:#e0e0e0;color:#999;">—</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fff8e1;border:1px solid #ffe082;color:#c8a415;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${m.district}</td><td class="name-cell" style="color:#999;text-decoration:line-through;">${m.name}<div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}" style="opacity:0.4;">${m.party}</span></td><td><span style="font-size:8px;padding:1px 6px;background:#e0e0e0;border:1px solid #bbb;color:#888;font-weight:700;">VACANT · ${reason}</span></td></tr>`;  
+    h+=`<tr style="background:#f5f5f5;opacity:0.6;"><td class="seniority-cell"><span class="seniority-badge" style="background:#e0e0e0;color:#999;">—</span></td><td style="text-align:center;"><span style="display:inline-block;padding:2px 8px;background:#fff8e1;border:1px solid #ffe082;color:#c8a415;font-size:10px;font-weight:700;min-width:28px;text-align:center;">${m.seniority}</span></td><td class="district-cell">${m.district}</td><td class="name-cell" style="color:#999;text-decoration:line-through;">${m.name}</td><td class="consultant-cell"><div class="consultant-tag-row">${consultantTagsHtml(m.name)}</div></td><td><span class="party-tag ${m.party}" style="opacity:0.4;">${m.party}</span></td><td><span style="font-size:8px;padding:1px 6px;background:#e0e0e0;border:1px solid #bbb;color:#888;font-weight:700;">VACANT · ${reason}</span></td></tr>`;  
   });  
   document.getElementById('senBody').innerHTML=h;  
 }  
