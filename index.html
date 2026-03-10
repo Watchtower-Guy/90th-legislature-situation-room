@@ -66,9 +66,10 @@
   <div class="table-wrap"><table><thead><tr>  
     <th onclick="sortTable(0,'num')" style="width:60px">'25 SENIORITY <span class="sort-arrow" id="sort0">▲</span></th>  
     <th onclick="sortTable(1,'str')">MEMBER <span class="sort-arrow" id="sort1"></span></th>  
-    <th onclick="sortTable(2,'str')" style="width:50px">PARTY <span class="sort-arrow" id="sort2"></span></th>  
-    <th onclick="sortTable(3,'num')" style="width:55px">DIST <span class="sort-arrow" id="sort3"></span></th>  
-    <th onclick="sortTable(4,'str')">COMMITTEES <span class="sort-arrow" id="sort4"></span></th>  
+    <th onclick="sortTable(2,'str')">CONSULTANT <span class="sort-arrow" id="sort2"></span></th>  
+    <th onclick="sortTable(3,'str')" style="width:50px">PARTY <span class="sort-arrow" id="sort3"></span></th>  
+    <th onclick="sortTable(4,'num')" style="width:55px">DIST <span class="sort-arrow" id="sort4"></span></th>  
+    <th onclick="sortTable(5,'str')">COMMITTEES <span class="sort-arrow" id="sort5"></span></th>  
   </tr></thead><tbody id="memberBody"></tbody></table>  
   <div class="empty-state" id="emptyState" style="display:none">NO MEMBERS MATCH CURRENT FILTERS</div></div>  
 </div></div>  
@@ -289,14 +290,14 @@
     </div>  
   </div>  
   <!-- SECTIONS -->  
-  <div style="font-size:9px;letter-spacing:3px;color:var(--text-primary);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--muted-light);padding-bottom:4px;">RETURNING INCUMBENTS — WON PRIMARY <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(Expected to win general)</span></div>  
-  <div id="sopReturning" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;"></div>  
-  <div style="font-size:9px;letter-spacing:3px;color:var(--warning);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--warning);padding-bottom:4px;">NEW FACES — PRIMARY WINNERS <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(No general contest or expected to win general)</span></div>  
-  <div id="sopNewFaces" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:20px;"></div>  
-  <div onclick="document.getElementById('sopRunoffsWrap').style.display=document.getElementById('sopRunoffsWrap').style.display==='none'?'flex':'none';this.querySelector('.chevron').classList.toggle('open')" style="font-size:9px;letter-spacing:3px;color:var(--success);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--success);padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">PRIMARY RUNOFFS — PENDING MAY RESULTS<span class="chevron" aria-hidden="true">▼</span></div>  
-  <div id="sopRunoffsWrap" style="margin-bottom:20px;"><div id="sopRunoffs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
-  <div onclick="document.getElementById('sopContestsWrap').style.display=document.getElementById('sopContestsWrap').style.display==='none'?'flex':'none';this.querySelector('.chevron').classList.toggle('open')" style="font-size:9px;letter-spacing:3px;color:#e65100;font-weight:700;margin-bottom:8px;border-bottom:2px solid #e65100;padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">NOVEMBER ALERT — CONTESTED GENERAL ELECTION RACES<span class="chevron" aria-hidden="true">▼</span></div>  
-  <div id="sopContestsWrap" style="margin-bottom:16px;"><div id="sopContests" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+  <div onclick="toggleSopSection('sopReturningWrap',this)" style="font-size:9px;letter-spacing:3px;color:var(--text-primary);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--muted-light);padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">RETURNING INCUMBENTS — WON PRIMARY <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(Expected to win general)</span><span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopReturningWrap" style="margin-bottom:20px;display:none;"><div id="sopReturning" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+  <div onclick="toggleSopSection('sopNewFacesWrap',this)" style="font-size:9px;letter-spacing:3px;color:var(--warning);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--warning);padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">NEW FACES — PRIMARY WINNERS <span style="font-weight:400;color:var(--muted);letter-spacing:1px">(No general contest or expected to win general)</span><span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopNewFacesWrap" style="margin-bottom:20px;display:none;"><div id="sopNewFaces" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+  <div onclick="toggleSopSection('sopRunoffsWrap',this)" style="font-size:9px;letter-spacing:3px;color:var(--success);font-weight:700;margin-bottom:8px;border-bottom:2px solid var(--success);padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">PRIMARY RUNOFFS — PENDING MAY RESULTS<span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopRunoffsWrap" style="margin-bottom:20px;display:none;"><div id="sopRunoffs" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
+  <div onclick="toggleSopSection('sopContestsWrap',this)" style="font-size:9px;letter-spacing:3px;color:#e65100;font-weight:700;margin-bottom:8px;border-bottom:2px solid #e65100;padding-bottom:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">NOVEMBER ALERT — CONTESTED GENERAL ELECTION RACES<span class="chevron" aria-hidden="true">▼</span></div>  
+  <div id="sopContestsWrap" style="margin-bottom:16px;display:none;"><div id="sopContests" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div></div>  
 </div></div>  
 <div class="footer">SITUATION ROOM · TEXAS HOUSE · Developed by Santino Camacho, Office of Rep. Drew Darby · Beta v1 · Election Data current with the Secretary of State, Mar. 04, 2026 · SOURCE: SOS CANVASS REPORTS · HOUSE JOURNAL RV#2 & RV#3</div>  
   
