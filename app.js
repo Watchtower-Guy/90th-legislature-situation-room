@@ -681,6 +681,7 @@ buildCommittees27();
   
 
 const consultantPalette=['#4c6ef5','#2f9e44','#f08c00','#7b2cbf','#0b7285','#c92a2a','#5f3dc4','#099268','#d9480f','#1c7ed6','#a61e4d','#e67700'];
+const consultantDefineColors=['#4169E1','#2e7d32','#b45309','#7b1fa2','#00838f','#c62828','#4e342e','#1565c0','#558b2f','#6a1b9a'];
 const consultantAssignments={
   'Chris Spencer':['Axiom'],
   'Jorge Borrego':['Berry'],
@@ -728,10 +729,12 @@ const consultantAssignments={
   'Angie Chen-Button':['Parr'],
   'Ellen Fleischmann':['Parr']
 };
+const consultantAssignmentsDefault=JSON.parse(JSON.stringify(consultantAssignments));
 const consultantByNorm={};
 Object.entries(consultantAssignments).forEach(([name,cons])=>{consultantByNorm[normName(name)]=[...cons];});
 const consultantNACache=new Set();
 const consultantColorMap={};
+const consultantDefineState={open:false,memberName:'',selectedColor:consultantDefineColors[0],pendingConsultant:null};
 
 function ensureConsultantColor(name){
   if(!consultantColorMap[name]){
@@ -760,8 +763,9 @@ function collectConsultantGroups(){
 function renderConsultantsBoard(){
   const wrap=document.getElementById('consultantsBoard');if(!wrap)return;
   const groups=collectConsultantGroups();
-  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span><span class="consultant-member-name">${escHtml(m.name)}</span><span class="consultant-member-dist">HD-${m.district}</span></div>`).join('')}</div></div>`;}).join('');
+  wrap.innerHTML=groups.map(([consultant,list])=>{const color=ensureConsultantColor(consultant);return `<div class="consultant-card" data-consultant="${escAttr(consultant)}" style="--consultant-color:${color};"><div class="consultant-card-head"><span>${escHtml(consultant)}</span><span>${list.length}</span></div><div class="consultant-dropzone">${list.map(m=>`<div class="consultant-member" draggable="true" data-member="${escAttr(m.name)}"><div class="consultant-member-head"><span class="consultant-member-name">${escHtml(m.name)}</span><span class="party-tag ${m.party}" style="font-size:8px;padding:1px 5px">${m.party}</span></div><div class="consultant-member-dist">HD-${m.district}</div></div>`).join('')}</div></div>`;}).join('');
   bindConsultantDnD();
+  bindConsultantContextMenus();
 }
 function bindConsultantDnD(){
   document.querySelectorAll('.consultant-member').forEach(el=>{
@@ -772,9 +776,91 @@ function bindConsultantDnD(){
     const zone=card.querySelector('.consultant-dropzone');
     zone.addEventListener('dragover',ev=>{ev.preventDefault();card.classList.add('drag-over');});
     zone.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
-    zone.addEventListener('drop',ev=>{ev.preventDefault();card.classList.remove('drag-over');const memberName=ev.dataTransfer.getData('text/plain');if(!memberName)return;setMemberConsultants(memberName,[card.dataset.consultant]);renderConsultantsBoard();buildSeniority();});
+    zone.addEventListener('drop',ev=>{
+      ev.preventDefault();card.classList.remove('drag-over');
+      const memberName=ev.dataTransfer.getData('text/plain');if(!memberName)return;
+      const consultantName=card.dataset.consultant;
+      const defineNew=window.confirm('Assign to this consultant? Click OK to assign, or Cancel to Define New.');
+      if(defineNew){setMemberConsultants(memberName,[consultantName]);renderConsultantsBoard();buildSeniority();return;}
+      openConsultantDefineModal(memberName,consultantName);
+    });
   });
 }
+function bindConsultantContextMenus(){
+  document.querySelectorAll('.consultant-member').forEach(el=>{
+    el.addEventListener('contextmenu',ev=>{
+      ev.preventDefault();
+      openConsultantContextMenu(ev.pageX,ev.pageY,el.dataset.member||'');
+    });
+  });
+}
+function openConsultantContextMenu(x,y,memberName){
+  const menu=document.getElementById('consultantContextMenu');if(!menu)return;
+  const groups=collectConsultantGroups().map(([name])=>name).filter(name=>name!=='N/A');
+  menu.innerHTML=[...groups.map(name=>`<button type="button" data-member="${escAttr(memberName)}" data-consultant="${escAttr(name)}">SET CONSULTANT: ${escHtml(name)}</button>`),`<button type="button" class="define-new" data-member="${escAttr(memberName)}" data-consultant="">DEFINE NEW</button>`].join('');
+  menu.style.left=`${x}px`;menu.style.top=`${y}px`;menu.style.display='block';
+  menu.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      closeConsultantContextMenu();
+      const targetMember=btn.dataset.member||'';
+      if(!targetMember)return;
+      if(btn.classList.contains('define-new')){openConsultantDefineModal(targetMember,'');return;}
+      setMemberConsultants(targetMember,[btn.dataset.consultant||'N/A']);renderConsultantsBoard();buildSeniority();
+    });
+  });
+}
+function closeConsultantContextMenu(){
+  const menu=document.getElementById('consultantContextMenu');if(menu)menu.style.display='none';
+}
+function openConsultantDefineModal(memberName,pendingConsultant){
+  const modal=document.getElementById('consultantDefineModal');if(!modal)return;
+  consultantDefineState.open=true;
+  consultantDefineState.memberName=memberName;
+  consultantDefineState.pendingConsultant=pendingConsultant||null;
+  consultantDefineState.selectedColor=consultantDefineColors[0];
+  const nameInput=document.getElementById('consultantDefineName');
+  const grid=document.getElementById('consultantColorGrid');
+  if(nameInput)nameInput.value='';
+  if(grid){
+    grid.innerHTML=consultantDefineColors.map((color,idx)=>`<button type="button" class="consultant-color-choice ${idx===0?'active':''}" data-color="${color}" style="background:${color};" aria-label="Consultant color ${idx+1}"></button>`).join('');
+    grid.querySelectorAll('.consultant-color-choice').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        consultantDefineState.selectedColor=btn.dataset.color||consultantDefineColors[0];
+        grid.querySelectorAll('.consultant-color-choice').forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+  modal.style.display='flex';
+  if(nameInput)nameInput.focus();
+}
+function closeConsultantDefineModal(){
+  const modal=document.getElementById('consultantDefineModal');if(modal)modal.style.display='none';
+  consultantDefineState.open=false;
+}
+function saveConsultantDefineModal(){
+  const nameInput=document.getElementById('consultantDefineName');if(!nameInput)return;
+  const newName=(nameInput.value||'').trim();
+  if(!newName||!consultantDefineState.memberName)return;
+  consultantColorMap[newName]=consultantDefineState.selectedColor;
+  setMemberConsultants(consultantDefineState.memberName,[newName]);
+  closeConsultantDefineModal();
+  renderConsultantsBoard();
+  buildSeniority();
+}
+function resetConsultants(){
+  Object.keys(consultantByNorm).forEach(k=>delete consultantByNorm[k]);
+  Object.entries(consultantAssignmentsDefault).forEach(([name,cons])=>{consultantByNorm[normName(name)]=[...cons];});
+  consultantNACache.clear();
+  closeConsultantContextMenu();
+  closeConsultantDefineModal();
+  renderConsultantsBoard();
+  buildSeniority();
+}
+document.addEventListener('click',ev=>{
+  const menu=document.getElementById('consultantContextMenu');
+  if(menu&&menu.style.display==='block'&&!menu.contains(ev.target))closeConsultantContextMenu();
+});
 
 /* ═══ '27 SENIORITY ═══ */  
 function buildSeniority(){  
