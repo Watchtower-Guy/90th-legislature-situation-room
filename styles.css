@@ -216,3 +216,22 @@ img,svg,canvas{max-width:100%;height:auto;}
   .table-wrap table{min-width:620px;}
   .race-card{margin-bottom:8px;}
 }
+
+.consultant-tag-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;}
+.consultant-tag{display:inline-block;padding:1px 5px;font-size:8px;letter-spacing:0.4px;font-weight:700;border:1px solid;white-space:nowrap;}
+.consultants-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.consultant-card{background:var(--surface);border:1px solid var(--border-color);border-top:3px solid var(--consultant-color,#4169E1);padding:8px;min-height:220px;transition:box-shadow .12s,border-color .12s;}
+.consultant-card.drag-over{border-color:var(--consultant-color,#4169E1);box-shadow:0 0 0 2px color-mix(in srgb,var(--consultant-color,#4169E1) 25%, transparent);}
+.consultant-card-head{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:1px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;border-bottom:1px solid var(--muted-rule);padding-bottom:4px;}
+.consultant-dropzone{display:flex;flex-direction:column;gap:5px;min-height:160px;}
+.consultant-member{display:flex;align-items:center;gap:6px;background:var(--muted-surface);border:1px solid var(--muted-rule);padding:4px 6px;cursor:grab;}
+.consultant-member.dragging{opacity:.45;}
+.consultant-member-name{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.consultant-member-dist{margin-left:auto;font-size:9px;color:var(--muted);font-weight:700;}
+
+@media (max-width: 1180px){
+  .consultants-board{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width: 640px){
+  .consultants-board{grid-template-columns:1fr;}
+}

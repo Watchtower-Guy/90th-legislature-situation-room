@@ -42,6 +42,7 @@
   <button type="button" data-tab="newfaces" class="sub-nav-btn" onclick="switchTabSub('newfaces','nav90')">NEW FACES</button>  
   <button type="button" data-tab="committees27" class="sub-nav-btn" onclick="switchTabSub('committees27','nav90')">COMMITTEES '27</button>  
   <button type="button" data-tab="seniority27" class="sub-nav-btn" onclick="switchTabSub('seniority27','nav90')">'27 SENIORITY</button>  
+  <button type="button" data-tab="consultants" class="sub-nav-btn" onclick="switchTabSub('consultants','nav90')">CONSULTANTS</button>  
   <button type="button" data-tab="sop" class="sub-nav-btn" onclick="switchTabSub('sop','nav90')">STATE OF PLAY, 2027</button>  
 </div>  
   
@@ -234,6 +235,13 @@
     <th>STATUS</th>  
   </tr></thead><tbody id="senBody"></tbody></table></div>  
 </div></div>  
+
+<div class="tab-panel" id="panel-consultants">  
+<div class="content">  
+  <div style="font-size:9px;letter-spacing:3px;color:var(--text-primary);font-weight:700;margin-bottom:10px;border-bottom:2px solid var(--muted-light);padding-bottom:4px;">CONSULTANT GROUPS <span style="font-weight:400;color:var(--muted);letter-spacing:1px;">(Drag members between cards to update Consultant tags)</span></div>  
+  <div id="consultantsBoard" class="consultants-board"></div>  
+</div></div>  
+
 <div class="tab-panel" id="panel-sop">  
 <div class="content">  
   <!-- HEMICYCLE + COUNTER ROW -->  
